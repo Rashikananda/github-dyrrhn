@@ -9,6 +9,7 @@ declare const google: any;
 export class AppComponent implements OnInit {
   currentLat;
   currentLong;
+  cityCircle;
     constructor() {
     GoogleMapsLoader.KEY = 'AIzaSyBAyMH-A99yD5fHQPz7uzqk8glNJYGEqus';
   }
@@ -22,49 +23,34 @@ export class AppComponent implements OnInit {
 
     GoogleMapsLoader.load(g => {
       this.map = new google.maps.Map(this.mapDiv.nativeElement, {
-        center: { lat: 51.921, lng: -10.037 },
-        zoom: 8,
+        center: { lat: 20.2961, lng: 85.8245 },
+        zoom: 12,
         disableDefaultUI: true
       });
 
     this.clickListener = this.map.addListener('click', (event) => {
       this.addMarker(event.latLng);
     });
+     this.cityCircle = new google.maps.Circle({
+      strokeColor: '#FF0000',
+      strokeOpacity: 0.8,
+      strokeWeight: 2,
+      fillColor: '#FF0000',
+      fillOpacity: 0.35,
+      center: { lat: 20.2961, lng: 85.8245 },
+      radius: 500,
+      editable:true,
+       draggable: true,
+  geodesic: true
     });
-    this.trackMe();
+    this.cityCircle.setMap(this.map);
+    this.map.addListener(this.cityCircle, 'radius_changed', (event) => {
+      console.log(event);
+    });
+    });
   }
 
-  showPosition(position) {
-    console.log(position);
-    this.currentLat = position.coords.latitude;
-    this.currentLong = position.coords.longitude;
-
-    let location = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-    this.map.panTo(location);
-
-    if (!this.markers) {
-      this.markers = new google.maps.Marker({
-        position: location,
-        map: this.map,
-        title: 'Got you!'
-      });
-    }
-    else {
-      // this.markers.setPosition(location);
-    }
-  }
-  trackMe() {
-    if (navigator.geolocation) {
-      // this.isTracking = true;
-      console.log("track")
-      navigator.geolocation.watchPosition((position) => {
-      console.log("")
-        this.showPosition(position);
-      });
-    } else {
-      alert("Geolocation is not supported by this browser.");
-    }
-  }
+  
 
   private addMarker(location) {
     let marker = new google.maps.Marker({
